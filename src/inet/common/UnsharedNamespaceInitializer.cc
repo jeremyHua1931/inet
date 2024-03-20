@@ -15,10 +15,14 @@ Register_GlobalConfigOption(CFGID_UNSHARE_USER_NAMESPACE, "unshare-user-namespac
 
 UnsharedNamespaceInitializer UnsharedNamespaceInitializer::singleton;
 
+#if OMNETPP_VERSION < 0x0700
 EXECUTE_ON_STARTUP(getEnvir()->addLifecycleListener(&UnsharedNamespaceInitializer::singleton));
+#endif
 
 void UnsharedNamespaceInitializer::lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details)
 {
+#if OMNETPP_VERSION < 0x0700
+    // TODO KLUDGE LF_ON_STARTUP removed
     if (eventType == LF_ON_STARTUP) {
         auto config = cSimulation::getActiveEnvir()->getConfig();
         if (config->getAsBool(CFGID_UNSHARE_USER_NAMESPACE)) {
@@ -31,6 +35,7 @@ void UnsharedNamespaceInitializer::lifecycleEvent(SimulationLifecycleEventType e
             unshareNetworkNamespace();
         }
     }
+#endif
 }
 
 void UnsharedNamespaceInitializer::unshareUserNamespace()
